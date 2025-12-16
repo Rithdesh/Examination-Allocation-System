@@ -10,12 +10,15 @@ const {
 
 const {
   allocateSeating,
+  getSeatingPlanByExam
 } = require('../Controllers/AllocationController');
 
 const {
   authenticateJWT,
   authorizeRoles
 } = require('../Middleware/Authmiddleware');
+
+const { exportSeatingPlanPDF } = require("../Controllers/PdfController");
 
 // Examination CRUD
 router.post('/create', authenticateJWT, authorizeRoles('admin'), createExamination);
@@ -24,6 +27,10 @@ router.put('/update/:id', authenticateJWT, authorizeRoles('admin'), updateExamin
 router.delete('/delete/:id', authenticateJWT, authorizeRoles('admin'), deleteExamination);
 
 // Seating allocation
-router.post('/:id/allocate', authenticateJWT, authorizeRoles('admin'), allocateSeating);
+router.post('/allocate/:id', authenticateJWT, authorizeRoles('admin'), allocateSeating);
+router.get("/seatingplan/:id",authenticateJWT, authorizeRoles("admin"),getSeatingPlanByExam);
+
+// Export seating plan as PDF
+router.get("/exportpdf/:id", authenticateJWT, authorizeRoles("admin"), exportSeatingPlanPDF);
 
 module.exports = router;

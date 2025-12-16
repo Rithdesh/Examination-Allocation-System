@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
-/* ---------- Roll Ranges ---------- */
+/* ---------- Roll Range ---------- */
 const rollRangeSchema = new mongoose.Schema(
   {
-    from: { type: Number, required: true },
-    to: { type: Number, required: true },
-    count: { type: Number, required: true },
+    from: Number,
+    to: Number,
+    count: Number,
   },
   { _id: false }
 );
@@ -13,16 +13,18 @@ const rollRangeSchema = new mongoose.Schema(
 /* ---------- Subject Allocation ---------- */
 const allocationSchema = new mongoose.Schema(
   {
-    subjectId: { type: mongoose.Schema.Types.ObjectId, ref: "Subject" },
-    subjectName: { type: String, required: true },
-    count: { type: Number, required: true },
-    overflow: { type: Boolean, default: false },
+    subjectName: {
+      type: String,
+      required: true,
+      uppercase: true,
+    },
+    count: Number,
     rollRanges: [rollRangeSchema],
   },
   { _id: false }
 );
 
-/* ---------- Classroom / Hall Allocation ---------- */
+/* ---------- Classroom ---------- */
 const classroomSchema = new mongoose.Schema(
   {
     hall: {
@@ -30,14 +32,13 @@ const classroomSchema = new mongoose.Schema(
       ref: "Hall",
       required: true,
     },
-
-    hallName: { type: String, required: true }, // snapshot
-    capacityAtAllocation: { type: Number, required: true },
-
-    studentsInHall: { type: Number, required: true },
-    notFull: { type: Boolean, default: false },
-    overflow: { type: Boolean, default: false },
-
+    hallName: {
+      type: String,
+      required: false, // 👈 auto-filled
+    },
+    capacityAtAllocation: Number,
+    studentsInHall: Number,
+    notFull: Boolean,
     allocations: [allocationSchema],
   },
   { _id: false }
@@ -51,14 +52,29 @@ const seatingPlanSchema = new mongoose.Schema(
       ref: "Examination",
       required: true,
     },
-
     classrooms: [classroomSchema],
-
-    totalStudents: { type: Number, required: true },
-    hasOverflow: { type: Boolean, default: false },
-    overflowDetails: { type: [String], default: [] },
+    totalStudents: Number,
+    hasOverflow: Boolean,
+    overflowDetails: [String],
   },
   { timestamps: true }
 );
+
+/* ======================================================
+   🔥 MIDDLEWARE: AUTO-FILL hallName FROM Hall COLLECTION
+====================================================== */
+seatingPlanSchema.pre("save", async function () {
+  const Hall = mongoose.model("Hall");
+
+  for (const classroom of this.classrooms) {
+    if (!classroom.hallName && classroom.hall) {
+      const hallDoc = await Hall.findById(classroom.hall).select("hallName");
+      if (hallDoc) {
+        classroom.hallName = hallDoc.hallName;
+      }
+    }
+  }
+});
+
 
 module.exports = mongoose.model("SeatingPlan", seatingPlanSchema);

@@ -1,51 +1,73 @@
 const Examination = require("../Models/Examination");
+const SeatingPlan = require("../Models/SeatingPlan");
 
-// CREATE EXAMINATION
 const createExamination = async (req, res) => {
   try {
     const {
-      examname,
+      examName,
       date,
-      subject,
-      duration,
-      hall
-      
+      durationMinutes, // ✅ FIXED
+      subjects,
     } = req.body;
 
-    if (!subject || !hall || !duration || !date) {
-      return res.status(400).json({ message: "All fields are required" });
+    /* ---- basic validation ---- */
+    if (
+      !examName ||
+      !date ||
+      typeof durationMinutes !== "number" ||
+      !Array.isArray(subjects) ||
+      subjects.length === 0
+    ) {
+      return res.status(400).json({
+        message: "Exam name, date, durationMinutes, and at least one subject are required",
+      });
     }
 
-    // check exam clash
+    /* ---- duplicate exam check ---- */
     const existingExam = await Examination.findOne({
       date,
-      subject,
-      duration,
-      hall
     });
 
     if (existingExam) {
-      return res.status(409).json({ message: "Exam already scheduled at this time" });
+      return res.status(409).json({
+        message: "Examination already exists for this date",
+      });
     }
 
-    const exam = new Examination({
-      date,
-      subject,
-      duration,
-      hall
+    /* ---- validate & normalize subjects ---- */
+    const formattedSubjects = subjects.map((s, index) => {
+      if (!s.subjectName) {
+        throw new Error(`subjectName missing for subject at index ${index}`);
+      }
+
+      return {
+        subjectName: s.subjectName.trim().toUpperCase(),
+        rollRanges: Array.isArray(s.rollRanges) ? s.rollRanges : [],
+        individualRolls: Array.isArray(s.individualRolls) ? s.individualRolls : [],
+      };
     });
 
-    await exam.save();
+    /* ---- create exam ---- */
+    const exam = await Examination.create({
+      examName: examName.trim(),
+      date,
+      durationMinutes, // ✅ FIXED
+      subjects: formattedSubjects,
+    });
 
     res.status(201).json({
       message: "Examination created successfully",
-      exam
+      exam,
     });
-
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("createExamination error:", error);
+    res.status(500).json({
+      message: "Failed to create examination",
+      error: error.message,
+    });
   }
 };
+
 
 // GET ALL EXAMINATIONS
 const getAllExaminations = async (req, res) => {
@@ -96,6 +118,11 @@ const deleteExamination = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+/* -------- GET SEATING PLAN BY EXAM -------- */
+
+
 
 module.exports = {
   createExamination,
