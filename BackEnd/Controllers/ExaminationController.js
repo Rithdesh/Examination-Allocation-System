@@ -4,25 +4,24 @@ const Examination = require("../Models/Examination");
 const createExamination = async (req, res) => {
   try {
     const {
+      examname,
+      date,
       subject,
-      department,
-      semester,
-      examDate,
-      startTime,
-      endTime,
+      duration,
       hall
+      
     } = req.body;
 
-    if (!subject || !department || !semester || !examDate || !startTime || !endTime) {
+    if (!subject || !hall || !duration || !date) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     // check exam clash
     const existingExam = await Examination.findOne({
-      department,
-      semester,
-      examDate,
-      startTime
+      date,
+      subject,
+      duration,
+      hall
     });
 
     if (existingExam) {
@@ -30,12 +29,9 @@ const createExamination = async (req, res) => {
     }
 
     const exam = new Examination({
+      date,
       subject,
-      department,
-      semester,
-      examDate,
-      startTime,
-      endTime,
+      duration,
       hall
     });
 
@@ -61,21 +57,6 @@ const getAllExaminations = async (req, res) => {
   }
 };
 
-// GET EXAM BY DEPARTMENT & SEMESTER
-const getExaminationsByDeptAndSem = async (req, res) => {
-  try {
-    const { department, semester } = req.query;
-
-    const exams = await Examination.find({
-      department,
-      semester
-    }).populate("subject");
-
-    res.status(200).json(exams);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
 // UPDATE EXAMINATION
 const updateExamination = async (req, res) => {
@@ -119,7 +100,6 @@ const deleteExamination = async (req, res) => {
 module.exports = {
   createExamination,
   getAllExaminations,
-  getExaminationsByDeptAndSem,
   updateExamination,
   deleteExamination
 };

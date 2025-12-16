@@ -1,19 +1,29 @@
 const express = require('express');
 const router = express.Router();
+
 const {
   createExamination,
   getAllExaminations,
-  getExaminationById,
   updateExamination,
   deleteExamination,
 } = require('../Controllers/ExaminationController');
 
-const {authenticateToken,authorizeRoles} = require('../Middleware/AuthMiddleware');
+const {
+  allocateSeating,
+} = require('../Controllers/AllocationController');
 
-router.post('exam/', authenticateToken, authorizeRoles(['admin']), createExamination);
-router.get('exam/', authenticateToken, authorizeRoles(['admin']), getAllExaminations);
-router.get('exam/:id', authenticateToken, authorizeRoles(['admin']), getExaminationById);
-router.put('exam/:id', authenticateToken, authorizeRoles(['admin']), updateExamination);
-router.delete('exam/:id', authenticateToken, authorizeRoles(['admin']), deleteExamination);
+const {
+  authenticateJWT,
+  authorizeRoles
+} = require('../Middleware/Authmiddleware');
+
+// Examination CRUD
+router.post('/create', authenticateJWT, authorizeRoles('admin'), createExamination);
+router.get('/getall', authenticateJWT, authorizeRoles('admin'), getAllExaminations);
+router.put('/update/:id', authenticateJWT, authorizeRoles('admin'), updateExamination);
+router.delete('/delete/:id', authenticateJWT, authorizeRoles('admin'), deleteExamination);
+
+// Seating allocation
+router.post('/:id/allocate', authenticateJWT, authorizeRoles('admin'), allocateSeating);
 
 module.exports = router;

@@ -8,18 +8,18 @@ require("dotenv").config();
 const register = async (req, res) => {
   try {
     
-    const { name, email, password, role } = req.body;
+    const { name, email, password, roles } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
+   
     const newUser = new User({
       name,
       email,
       password: hashedPassword,
-      roles: Array.isArray(role) ? role : [role || 'Student']
+      roles: Array.isArray(roles) ? roles : [roles || 'STUDENT']
       
     });
 
@@ -60,7 +60,6 @@ const login = async (req, res) => {
     res.status(200).json({
       token
     });
-    // console.log("Login successful",user.name);
 
     
   } catch (error) {
