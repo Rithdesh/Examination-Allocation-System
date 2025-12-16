@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 
 //ROUTES
 const UserRoutes = require('./Routes/UserRoutes');
+const ExaminationRoutes = require('./Routes/ExaminationRoutes');
 
 const app = express();
 const PORT = process.env.PORT;
@@ -27,6 +28,7 @@ app.get('/', (req, res) => {
 
 //REGISTER ROUTES
 app.use('/examallocation/users', UserRoutes);
+app.use('/examallocation/examinations', ExaminationRoutes);
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
