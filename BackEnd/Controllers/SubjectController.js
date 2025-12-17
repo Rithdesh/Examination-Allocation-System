@@ -3,16 +3,16 @@ const Subject = require("../Models/Subject");
 /* -------- CREATE SUBJECT -------- */
 exports.createSubject = async (req, res) => {
   try {
-    const { name, code } = req.body;
+    let { name, code } = req.body;
 
     if (!name) {
       return res.status(400).json({ message: "Subject name is required" });
     }
-
+    
     const existing = await Subject.findOne({
       name: name.trim().toUpperCase(),
     });
-
+    name = name.trim().toUpperCase();
     if (existing) {
       return res.status(409).json({ message: "Subject already exists" });
     }

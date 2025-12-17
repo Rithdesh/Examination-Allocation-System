@@ -41,3 +41,19 @@ Models – MongoDB schemas
 Middleware – Auth & validation
 
 Server.js – Express server setup
+
+Frontend (React + Vite + Tailwind)
+
+- Location: ./frontend
+- Quick start:
+  1. cd frontend
+  2. npm install
+  3. npm run dev
+- Build:
+  - npm run build
+  - npm run preview
+
+Notes:
+
+- The frontend is a Vite + React app with Tailwind configured (tailwindcss, postcss, autoprefixer).
+- To connect to the backend, set API base URLs via environment variables or proxy in development as needed.

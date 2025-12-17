@@ -26,7 +26,6 @@ router.post(
 router.get(
   "/getall",
   authenticateJWT,
-  authorizeRoles("admin"),
   getAllSubjects
 );
 

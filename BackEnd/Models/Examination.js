@@ -1,71 +1,44 @@
 const mongoose = require("mongoose");
 
-/* ---------- Roll Range Schema ---------- */
 const rollRangeSchema = new mongoose.Schema(
   {
-    from: {
-      type: Number,
-      required: true,
-    },
-    to: {
-      type: Number,
-      required: true,
-    },
+    from: Number,
+    to: Number
   },
   { _id: false }
 );
 
-/* ---------- Subject Schema ---------- */
-const examSubjectSchema = new mongoose.Schema(
+const subjectSchema = new mongoose.Schema(
   {
     subjectName: {
       type: String,
       required: true,
-      trim: true,
-      uppercase: true, // 🔥 normalization
+      uppercase: true
     },
-    rollRanges: {
-      type: [rollRangeSchema],
-      default: [],
-    },
-    individualRolls: {
-      type: [Number],
-      default: [],
-    },
+    rollRanges: [rollRangeSchema],
+    individualRolls: [Number]
   },
   { _id: false }
 );
 
-/* ---------- Examination Schema ---------- */
 const examinationSchema = new mongoose.Schema(
   {
     examName: {
       type: String,
-      required: true,
-      trim: true,
+      required: true
     },
-
     date: {
       type: Date,
-      required: true,
+      required: true
     },
-
     durationMinutes: {
       type: Number,
-      default: 120,
-      min: 30,
+      required: true
     },
-
     subjects: {
-      type: [examSubjectSchema],
-      required: true,
-      validate: {
-        validator: function (arr) {
-          return arr.length > 0;
-        },
-        message: "At least one subject is required",
-      },
-    },
+      type: [subjectSchema],
+      required: true
+    }
   },
   { timestamps: true }
 );
